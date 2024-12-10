@@ -1,7 +1,7 @@
 import Hello from "./components/Hello";
 import ListGroup from "./components/ListGroup";
 import Button from "./components/Button";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Alert from "./components/Alert";
 import CPMGraph from "./components/CMPGraph";
 import "./App.css";
@@ -10,14 +10,26 @@ function App() {
   const [isCalcVisable, setCalcVisable] = useState(false);
   const [isResultVisable, setResultVisable] = useState(false);
   const [title, setTitle] = useState("");
+  const [taskButton, setTaskButton] = useState("Przejdź dalej");
+
+  const inputRefTask = useRef<HTMLInputElement>(null);
+  const inputRefEvent = useRef<HTMLInputElement>(null);
+  const inputBlock = useRef<HTMLInputElement>(null);
 
   //handlers
   const handleStartButton = () => {
     setCalcVisable(true);
-    setTitle(
-      "Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (wierzchołki)"
-    );
+    setTitle("Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)");
   };
+
+  const handleInputButton = () => {
+    if (inputBlock.current) {
+      if (inputBlock.current.style.display !== "none")
+        inputBlock.current.style.display = "none";
+      else inputBlock.current.style.display = "block";
+    }
+  };
+
   return (
     <div>
       <div className="dropdown">
@@ -99,30 +111,49 @@ function App() {
                 </div>
                 <div className="card-body">
                   <h5 className="card-title pt-2">{title}</h5>
-                  <div className="pt-2 pb-4">
+                  <div className="pt-2 pb-4" ref={inputBlock}>
                     <div className="form-floating mb-3 pt-2">
                       <input
+                        ref={inputRefTask}
                         type="number"
                         className="form-control"
                         id="taskNumberID"
                         placeholder="taskNumberID"
-                        style={{ width: "50px", resize: "none" }}
+                        style={{ width: "200px", resize: "none" }}
                       />
-                      <label htmlFor="floatingInput">Liczba czyności</label>
+                      <label id="l1" htmlFor="taskNumberID">
+                        Liczba czyności
+                      </label>
                     </div>
                     <div className="form-floating">
                       <input
+                        ref={inputRefEvent}
                         type="number"
                         className="form-control"
                         id="eventNumberID"
                         placeholder="eventNumberID"
                         style={{ width: "200px", resize: "none" }}
                       />
-                      <label htmlFor="eventNumberID">Liczba zdarzeń</label>
+                      <label id="l2" htmlFor="eventNumberID">
+                        Liczba zdarzeń
+                      </label>
                     </div>
                   </div>
-                  <a href="#" className="btn btn-primary">
-                    Go somewhere
+                  <a
+                    href="#calc"
+                    className="btn btn-primary m-2"
+                    onClick={() => {
+                      console.log("elo mordo");
+                    }}
+                  >
+                    elo mordo
+                  </a>
+                  <a
+                    href="#calc"
+                    className="btn btn-primary m-2"
+                    onClick={handleInputButton}
+                  >
+                    {taskButton}
                   </a>
                 </div>
                 <div className="card-footer">
