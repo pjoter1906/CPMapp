@@ -5,15 +5,35 @@ import { useState, useRef } from "react";
 import Alert from "./components/Alert";
 import CPMGraph from "./components/CMPGraph";
 import "./App.css";
+import SolveFirstInput from "./components/SolveFirstInput";
+import SolveSecoundInput from "./components/SolveSecoundInput";
+
+const numToLetter = (
+  eventsTab: string[],
+  LetterTab: string[],
+  inputNumber: number
+) => {
+  let i = 0;
+  let tekst: string = "";
+  while (i < inputNumber) {
+    eventsTab.push(LetterTab[i] + " ");
+    tekst += eventsTab[i];
+    i++;
+  }
+  console.log(tekst);
+};
 
 function App() {
+  // const LetterTab: string[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+  // const eventsTab: string[] = [];
+  // numToLetter(eventsTab, LetterTab, 5);
   const [isCalcVisable, setCalcVisable] = useState(false);
   const [isResultVisable, setResultVisable] = useState(false);
   const [title, setTitle] = useState("");
   const [taskButton, setTaskButton] = useState("Przejdź dalej");
 
   const inputRefTask = useRef<HTMLInputElement>(null);
-  const inputRefEvent = useRef<HTMLInputElement>(null);
+  const inputRefNode = useRef<HTMLInputElement>(null);
   const inputBlock = useRef<HTMLInputElement>(null);
 
   //handlers
@@ -22,12 +42,11 @@ function App() {
     setTitle("Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)");
   };
 
+  const [isClicked, setClicked] = useState(false);
+  const [tskNum, setTskNum] = useState(0);
   const handleInputButton = () => {
-    if (inputBlock.current) {
-      if (inputBlock.current.style.display !== "none")
-        inputBlock.current.style.display = "none";
-      else inputBlock.current.style.display = "block";
-    }
+    setClicked(true);
+    setTskNum(Number(inputRefTask.current?.value));
   };
 
   return (
@@ -111,40 +130,18 @@ function App() {
                 </div>
                 <div className="card-body">
                   <h5 className="card-title pt-2">{title}</h5>
-                  <div className="pt-2 pb-4" ref={inputBlock}>
-                    <div className="form-floating mb-3 pt-2">
-                      <input
-                        ref={inputRefTask}
-                        type="number"
-                        className="form-control"
-                        id="taskNumberID"
-                        placeholder="taskNumberID"
-                        style={{ width: "200px", resize: "none" }}
-                      />
-                      <label id="l1" htmlFor="taskNumberID">
-                        Liczba czyności
-                      </label>
-                    </div>
-                    <div className="form-floating">
-                      <input
-                        ref={inputRefEvent}
-                        type="number"
-                        className="form-control"
-                        id="eventNumberID"
-                        placeholder="eventNumberID"
-                        style={{ width: "200px", resize: "none" }}
-                      />
-                      <label id="l2" htmlFor="eventNumberID">
-                        Liczba zdarzeń
-                      </label>
-                    </div>
-                  </div>
+                  {!isClicked ? (
+                    <SolveFirstInput
+                      inputRefTask={inputRefTask}
+                      inputRefNode={inputRefNode}
+                    />
+                  ) : (
+                    <></>
+                  )}
                   <a
                     href="#calc"
                     className="btn btn-primary m-2"
-                    onClick={() => {
-                      console.log("elo mordo");
-                    }}
+                    onClick={() => setClicked(false)}
                   >
                     elo mordo
                   </a>
@@ -155,6 +152,11 @@ function App() {
                   >
                     {taskButton}
                   </a>
+                  {isClicked ? (
+                    <SolveSecoundInput taskNumber={tskNum} nodeNumber={5} />
+                  ) : (
+                    <></>
+                  )}
                 </div>
                 <div className="card-footer">
                   <small className="text-body-secondary">
