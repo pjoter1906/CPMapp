@@ -8,76 +8,56 @@ import "./App.css";
 import SolveFirstInput from "./components/SolveFirstInput";
 import SolveSecoundInput from "./components/SolveSecoundInput";
 
-const numToLetter = (
-  eventsTab: string[],
-  LetterTab: string[],
-  inputNumber: number
-) => {
-  let i = 0;
-  let tekst: string = "";
-  while (i < inputNumber) {
-    eventsTab.push(LetterTab[i] + " ");
-    tekst += eventsTab[i];
-    i++;
-  }
-  console.log(tekst);
+export type TaskData = {
+  task: string | null | undefined;
+  duration: number;
+  taskFrom: number;
+  taskTo: number;
 };
 
 function App() {
-  // const LetterTab: string[] = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
-  // const eventsTab: string[] = [];
-  // numToLetter(eventsTab, LetterTab, 5);
   const [isCalcVisable, setCalcVisable] = useState(false);
   const [isResultVisable, setResultVisable] = useState(false);
   const [title, setTitle] = useState("");
-  const [taskButton, setTaskButton] = useState("Przejdź dalej");
 
   const inputRefTask = useRef<HTMLInputElement>(null);
   const inputRefNode = useRef<HTMLInputElement>(null);
-  const inputBlock = useRef<HTMLInputElement>(null);
 
   //handlers
   const handleStartButton = () => {
     setCalcVisable(true);
     setTitle("Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)");
   };
+  const [isTaskError, setTaskError] = useState(false);
+  const [isNodeError, setNodeError] = useState(false);
+
+  const checkInputValue = (taskVal: number, nodeVal: number) => {
+    if (taskVal <= 0 || nodeVal <= 0) {
+      if (taskVal <= 0) setTaskError(true);
+      if (nodeVal <= 0) setNodeError(true);
+      return false;
+    }
+    return true;
+  };
 
   const [isClicked, setClicked] = useState(false);
   const [tskNum, setTskNum] = useState(0);
+  const [ndNum, setNdNum] = useState(0);
   const handleInputButton = () => {
-    setClicked(true);
-    setTskNum(Number(inputRefTask.current?.value));
+    setTaskError(false);
+    setNodeError(false);
+    const taskVal = Number(inputRefTask.current?.value);
+    const nodeVal = Number(inputRefNode.current?.value);
+    if (checkInputValue(taskVal, nodeVal)) {
+      setClicked(true);
+      setTitle("Podaj czasy trwania oraz następstwa zdarzeń");
+      setTskNum(taskVal);
+      setNdNum(nodeVal);
+    }
   };
 
   return (
     <div>
-      <div className="dropdown">
-        <button
-          className="btn btn-secondary dropdown-toggle"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-        >
-          Dropdown button
-        </button>
-        <ul className="dropdown-menu">
-          <li>
-            <a className="dropdown-item" href="#">
-              Action
-            </a>
-          </li>
-          <li>
-            <a className="dropdown-item" href="#">
-              Another action
-            </a>
-          </li>
-          <li>
-            <a className="dropdown-item" href="#">
-              Something else here
-            </a>
-          </li>
-        </ul>
-      </div>
       <div className="container pt-3">
         <div className="row">
           <div className="col-12">
@@ -126,43 +106,61 @@ function App() {
             <div className="col-12">
               <div className="card">
                 <div className="card-header text-center">
-                  CMP app - wprowadzanie danych
+                  CPM app - wprowadzanie danych
                 </div>
                 <div className="card-body">
-                  <h5 className="card-title pt-2">{title}</h5>
+                  <h5 className="card-title pt-2 pb-3">{title}</h5>
                   {!isClicked ? (
-                    <SolveFirstInput
-                      inputRefTask={inputRefTask}
-                      inputRefNode={inputRefNode}
-                    />
+                    <>
+                      {/* inputRefNode={inputRefNode} */}
+                      <SolveFirstInput
+                        inputRefTask={inputRefTask}
+                        isError={isTaskError}
+                      >
+                        Liczba czynności
+                      </SolveFirstInput>
+                      <SolveFirstInput
+                        inputRefNode={inputRefNode}
+                        isError={isNodeError}
+                      >
+                        Liczba zdarzeń
+                      </SolveFirstInput>
+                      <a
+                        href="#calc"
+                        className="btn btn-primary m-2"
+                        onClick={handleInputButton}
+                      >
+                        Przejdź dalej
+                      </a>
+                    </>
                   ) : (
                     <></>
                   )}
-                  <a
-                    href="#calc"
-                    className="btn btn-primary m-2"
-                    onClick={() => setClicked(false)}
-                  >
-                    elo mordo
-                  </a>
-                  <a
-                    href="#calc"
-                    className="btn btn-primary m-2"
-                    onClick={handleInputButton}
-                  >
-                    {taskButton}
-                  </a>
+
                   {isClicked ? (
-                    <SolveSecoundInput taskNumber={tskNum} nodeNumber={5} />
+                    <>
+                      <SolveSecoundInput
+                        taskNumber={tskNum}
+                        nodeNumber={ndNum}
+                      />
+                      <a href="#calc">
+                        <Button
+                          onClick={() => {
+                            setClicked(false);
+                            setTitle(
+                              "Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)"
+                            );
+                          }}
+                        >
+                          Powrót
+                        </Button>
+                      </a>
+                    </>
                   ) : (
                     <></>
                   )}
                 </div>
-                <div className="card-footer">
-                  <small className="text-body-secondary">
-                    Last updated 3 mins ago
-                  </small>
-                </div>
+                <div className="card-footer"></div>
               </div>
             </div>
           </div>

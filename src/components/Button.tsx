@@ -8,7 +8,7 @@ interface Props {
 }
 
 function Button({ color = "primary", onClick, children }: Props) {
-  let buttonClasses: string = "btn btn-" + color;
+  let buttonClasses: string = "btn btn-" + color + " mb-2";
   return (
     <button type="button" className={buttonClasses} onClick={onClick}>
       {children}

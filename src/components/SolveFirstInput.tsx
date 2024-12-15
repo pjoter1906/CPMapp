@@ -1,14 +1,34 @@
+import { useState, useEffect } from "react";
+
 interface Props {
-  inputRefTask: React.RefObject<HTMLInputElement>;
-  inputRefNode: React.RefObject<HTMLInputElement>;
+  inputRefTask?: React.RefObject<HTMLInputElement>;
+  inputRefNode?: React.RefObject<HTMLInputElement>;
+  children: string;
+  isError: boolean;
 }
 
-const SolveFirstInput = ({ inputRefTask, inputRefNode }: Props) => {
+const SolveFirstInput = ({
+  inputRefTask,
+  inputRefNode,
+  children,
+  isError,
+}: Props) => {
+  const [cellHide, setCellHide] = useState("d-none");
+  useEffect(() => {
+    if (isError) {
+      setCellHide("");
+    } else {
+      setCellHide("d-none");
+    }
+  }, [isError]);
   return (
-    <div className="pt-2 pb-4">
-      <div className="form-floating mb-3 pt-2">
+    <div className="pb-3">
+      <label id="main" className={`${cellHide}`}>
+        <p style={{ color: "red" }}>Podaj liczbę większą od 0</p>
+      </label>
+      <div className="form-floating mb-2">
         <input
-          ref={inputRefTask}
+          ref={inputRefTask ? inputRefTask : inputRefNode}
           type="number"
           className="form-control"
           id="taskNumberID"
@@ -16,20 +36,7 @@ const SolveFirstInput = ({ inputRefTask, inputRefNode }: Props) => {
           style={{ width: "200px", resize: "none" }}
         />
         <label id="l1" htmlFor="taskNumberID">
-          Liczba czyności
-        </label>
-      </div>
-      <div className="form-floating">
-        <input
-          ref={inputRefNode}
-          type="number"
-          className="form-control"
-          id="eventNumberID"
-          placeholder="eventNumberID"
-          style={{ width: "200px", resize: "none" }}
-        />
-        <label id="l2" htmlFor="eventNumberID">
-          Liczba zdarzeń
+          {children}
         </label>
       </div>
     </div>
