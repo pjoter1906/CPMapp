@@ -1,11 +1,23 @@
-import React, { useState, useRef, useEffect, MutableRefObject } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  MutableRefObject,
+  Dispatch,
+  SetStateAction,
+} from "react";
 import Button from "./Button";
-import { TaskData } from "../App";
+import { TaskData, CalculationData } from "../App";
 import Select from "./Select";
+import { root } from "cheerio/dist/commonjs/static";
+import CPMtable from "./CPMtable";
 
 interface Props {
   taskNumber: number;
   nodeNumber: number;
+  tabGlobal: CalculationData[];
+  setResultVis: Dispatch<SetStateAction<boolean>>;
+  setCalcVisabl: Dispatch<SetStateAction<boolean>>;
 }
 
 const letterTab: string[] = [
@@ -47,7 +59,13 @@ const createEventsTab = (taskNumber: number, letTab: string[]) => {
   return taskTab;
 };
 
-const SolveSecoundInput = ({ taskNumber, nodeNumber }: Props) => {
+const SolveSecoundInput = ({
+  taskNumber,
+  nodeNumber,
+  tabGlobal,
+  setResultVis,
+  setCalcVisabl,
+}: Props) => {
   const [cellHide, setCellHide] = useState("d-none");
 
   const createInputTable = (
@@ -165,8 +183,125 @@ const SolveSecoundInput = ({ taskNumber, nodeNumber }: Props) => {
       }
     }
     if (isError) colData.length = 0;
-    console.log(colData);
+    else {
+      calculateData(colData, nodeNumber);
+      setResultVis(true);
+      setCalcVisabl(false);
+    }
   };
+
+  //calculationg
+
+  const calculateData = (colData: TaskData[], nodeNumber: number) => {
+    //const tabGlobal: CalculationData[] = [];
+    // Tworzymy strukturę obliczeniową
+    colData.forEach((elem) => {
+      tabGlobal.push({
+        root: {
+          task: elem.task,
+          duration: elem.duration,
+          taskFrom: elem.taskFrom,
+          taskTo: elem.taskTo,
+        },
+        ES: 0,
+        EF: 0,
+        LS: 0,
+        LF: 0,
+        reserve: 0,
+        isCritical: false,
+      });
+    });
+
+    console.log("ES i EF");
+    let maxDuration = 0;
+
+    // Krok w przód (ES i EF)
+    tabGlobal.forEach((elem) => {
+      tabGlobal.forEach((node) => {
+        if (node.root.taskTo === elem.root.taskFrom) {
+          if (node.EF > elem.ES) elem.ES = node.EF;
+        }
+      });
+      elem.EF = elem.ES + elem.root.duration;
+      if (elem.EF > maxDuration) maxDuration = elem.EF;
+    });
+
+    console.log("ES i EF wyliczone:", tabGlobal, maxDuration);
+
+    // Krok w tył (LS i LF)
+    tabGlobal.forEach((elem) => {
+      if (elem.root.taskTo === nodeNumber) {
+        elem.LF = maxDuration; // LF dla ostatniego zadania
+      }
+    });
+
+    for (let i = tabGlobal.length - 1; i >= 0; i--) {
+      const elem = tabGlobal[i];
+      tabGlobal.forEach((node) => {
+        if (node.root.taskFrom === elem.root.taskTo) {
+          elem.LF = elem.LF === 0 ? node.LS : Math.min(elem.LF, node.LS);
+        }
+      });
+      elem.LS = elem.LF - elem.root.duration;
+    }
+
+    // Rezerwa i krytyczność
+    tabGlobal.forEach((elem) => {
+      elem.reserve = elem.LS - elem.ES;
+      elem.isCritical = elem.reserve === 0;
+    });
+
+    console.log("Tablica po kroku w tył i obliczeniach:", tabGlobal);
+  };
+
+  // const calculateData = (colData: TaskData[], nodeNumber: number) => {
+  //   const tabGlobal: CalculationData[] = [];
+  //   //ustawiamy na 0
+  //   colData.forEach((elem) => {
+  //     tabGlobal.push({
+  //       root: {
+  //         task: elem.task,
+  //         duration: elem.duration,
+  //         taskFrom: elem.taskFrom,
+  //         taskTo: elem.taskTo,
+  //       },
+  //       ES: 0,
+  //       EF: 0,
+  //       LS: 0,
+  //       LF: 0,
+  //       reserve: 0,
+  //       isCritical: false,
+  //     });
+  //   });
+  //   console.log(tabGlobal);
+  //   console.log("ES i EF");
+  //   let maxDuration = 0;
+  //   tabGlobal.forEach((elem) => {
+  //     tabGlobal.forEach((node) => {
+  //       if (node.root.taskTo === elem.root.taskFrom)
+  //         if (node.EF > elem.ES) elem.ES = node.EF;
+  //       elem.EF = elem.ES + elem.root.duration;
+  //       if (elem.EF > maxDuration) maxDuration = elem.EF;
+  //     });
+  //   });
+  //   console.log(tabGlobal, maxDuration);
+  //   // LS LF
+  //   tabGlobal.forEach((elem) => {
+  //     if (elem.root.taskTo === nodeNumber) elem.LF = maxDuration;
+  //   });
+  //   tabGlobal.reverse().forEach((elem) => {
+  //     tabGlobal.forEach((node) => {
+  //       if (elem.root.taskFrom === node.root.taskTo)
+  //         if (elem.LS > node.LF) node.LF = elem.LS;
+  //       elem.LS = elem.LF - elem.root.duration;
+  //     });
+  //   });
+  //   tabGlobal.reverse().forEach((elem) => {
+  //     elem.reserve = elem.LS - elem.ES;
+  //     if (elem.reserve === 0) elem.isCritical = true;
+  //   });
+  //   console.log(tabGlobal);
+  // };
 
   return (
     <div className="col-10">
@@ -200,7 +335,9 @@ const SolveSecoundInput = ({ taskNumber, nodeNumber }: Props) => {
         </tbody>
       </table>
       <div className="pt-3">
-        <Button onClick={handleEnterData}>Przejdź do wyników</Button>
+        <a href="#result">
+          <Button onClick={handleEnterData}>Przejdź do wyników</Button>{" "}
+        </a>
       </div>
     </div>
   );

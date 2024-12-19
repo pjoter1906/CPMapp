@@ -3,6 +3,8 @@ interface Props {
   isFrom: boolean;
 }
 
+let selectId = 0;
+
 const numberTabGenerate = (num: number) => {
   let i = 0;
   const numberTab: number[] = [];
@@ -21,8 +23,13 @@ const optionGenerate = (num: number) =>
   ));
 
 const Select = ({ nodesNumber, isFrom }: Props) => {
+  selectId += 1;
   return (
-    <select className="form-select" id="selectWithPlaceholder" defaultValue="">
+    <select
+      className="form-select"
+      id={"select-" + selectId.toString()}
+      defaultValue=""
+    >
       <option value="" disabled>
         {!isFrom ? "Zdarzenie kończące" : "Zdarzenie początkowe"}
       </option>
