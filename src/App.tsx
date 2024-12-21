@@ -102,18 +102,6 @@ function App() {
 
   return (
     <div className="card mb-3">
-      <div className="card-header">
-        <img
-          className="card-img-top img-fluid"
-          src="../public/logo3.jpeg"
-          alt="Card image cap"
-          style={{
-            height: "300px",
-            objectFit: "cover",
-            objectPosition: "center 42%",
-          }}
-        />
-      </div>
       <div className="card-body">
         {isStartVisable && (
           <div className="container pt-1" id="#start">
