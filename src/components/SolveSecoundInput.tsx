@@ -1,16 +1,7 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  MutableRefObject,
-  Dispatch,
-  SetStateAction,
-} from "react";
+import React, { useState, useRef, Dispatch, SetStateAction } from "react";
 import Button from "./Button";
 import { TaskData, CalculationData } from "../App";
 import Select from "./Select";
-import { root } from "cheerio/dist/commonjs/static";
-import CPMtable from "./CPMtable";
 
 interface Props {
   taskNumber: number;
@@ -46,8 +37,6 @@ const letterTab: string[] = [
   "Y",
   "Z",
 ];
-
-//const [cellHide, setCellHide] = useState("d-none");
 
 const createEventsTab = (taskNumber: number, letTab: string[]) => {
   let i = 0;
@@ -193,8 +182,6 @@ const SolveSecoundInput = ({
   //calculationg
 
   const calculateData = (colData: TaskData[], nodeNumber: number) => {
-    //const tabGlobal: CalculationData[] = [];
-    // Tworzymy strukturę obliczeniową
     colData.forEach((elem) => {
       tabGlobal.push({
         root: {
@@ -212,7 +199,6 @@ const SolveSecoundInput = ({
       });
     });
 
-    console.log("ES i EF");
     let maxDuration = 0;
 
     // Krok w przód (ES i EF)
@@ -225,8 +211,6 @@ const SolveSecoundInput = ({
       elem.EF = elem.ES + elem.root.duration;
       if (elem.EF > maxDuration) maxDuration = elem.EF;
     });
-
-    console.log("ES i EF wyliczone:", tabGlobal, maxDuration);
 
     // Krok w tył (LS i LF)
     tabGlobal.forEach((elem) => {
@@ -250,58 +234,7 @@ const SolveSecoundInput = ({
       elem.reserve = elem.LS - elem.ES;
       elem.isCritical = elem.reserve === 0;
     });
-
-    console.log("Tablica po kroku w tył i obliczeniach:", tabGlobal);
   };
-
-  // const calculateData = (colData: TaskData[], nodeNumber: number) => {
-  //   const tabGlobal: CalculationData[] = [];
-  //   //ustawiamy na 0
-  //   colData.forEach((elem) => {
-  //     tabGlobal.push({
-  //       root: {
-  //         task: elem.task,
-  //         duration: elem.duration,
-  //         taskFrom: elem.taskFrom,
-  //         taskTo: elem.taskTo,
-  //       },
-  //       ES: 0,
-  //       EF: 0,
-  //       LS: 0,
-  //       LF: 0,
-  //       reserve: 0,
-  //       isCritical: false,
-  //     });
-  //   });
-  //   console.log(tabGlobal);
-  //   console.log("ES i EF");
-  //   let maxDuration = 0;
-  //   tabGlobal.forEach((elem) => {
-  //     tabGlobal.forEach((node) => {
-  //       if (node.root.taskTo === elem.root.taskFrom)
-  //         if (node.EF > elem.ES) elem.ES = node.EF;
-  //       elem.EF = elem.ES + elem.root.duration;
-  //       if (elem.EF > maxDuration) maxDuration = elem.EF;
-  //     });
-  //   });
-  //   console.log(tabGlobal, maxDuration);
-  //   // LS LF
-  //   tabGlobal.forEach((elem) => {
-  //     if (elem.root.taskTo === nodeNumber) elem.LF = maxDuration;
-  //   });
-  //   tabGlobal.reverse().forEach((elem) => {
-  //     tabGlobal.forEach((node) => {
-  //       if (elem.root.taskFrom === node.root.taskTo)
-  //         if (elem.LS > node.LF) node.LF = elem.LS;
-  //       elem.LS = elem.LF - elem.root.duration;
-  //     });
-  //   });
-  //   tabGlobal.reverse().forEach((elem) => {
-  //     elem.reserve = elem.LS - elem.ES;
-  //     if (elem.reserve === 0) elem.isCritical = true;
-  //   });
-  //   console.log(tabGlobal);
-  // };
 
   return (
     <div className="col-10">
@@ -334,9 +267,12 @@ const SolveSecoundInput = ({
           )}
         </tbody>
       </table>
-      <div className="pt-3">
+      <hr />
+      <div className="pt-1">
         <a href="#result">
-          <Button onClick={handleEnterData}>Przejdź do wyników</Button>{" "}
+          <Button color="secondary" onClick={handleEnterData}>
+            Przejdź do wyników
+          </Button>{" "}
         </a>
       </div>
     </div>

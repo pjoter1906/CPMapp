@@ -51,14 +51,12 @@ const CPMGraph: React.FC<Props> = ({ tabGlobal, nodeNumber }) => {
     data: {
       source: elem.root.taskFrom.toString(),
       target: elem.root.taskTo.toString(),
-      //label: "elo mordooo",
       label: `${elem.root.task} ${elem.root.duration}\nES: ${elem.ES} | EF: ${elem.EF}\nLS: ${elem.LS} | LF: ${elem.LF}\nrezerwa: ${elem.reserve}`,
       isCritical: elem.isCritical.toString(),
     },
   }));
 
   const combinedArray = [...graphNode, ...graphTask];
-  console.log(graphNode);
   useEffect(() => {
     if (containerRef.current) {
       const cy = cytoscape({
@@ -68,38 +66,36 @@ const CPMGraph: React.FC<Props> = ({ tabGlobal, nodeNumber }) => {
           {
             selector: "node",
             style: {
-              "background-color": "#0074D9",
+              "background-color": "#f0f0f0",
               label: "data(label)",
               "text-valign": "center",
               "text-halign": "center",
-              color: "#fff",
+              color: "#000",
               "font-size": "16px",
-              width: "label",
-              height: "label",
               shape: "octagon",
               "text-wrap": "wrap",
               "text-max-width": "100",
-              "padding-top": "6px",
             },
           },
           {
             selector: "edge",
             style: {
-              label: "data(label)", // Pobiera wartość z pola `label`
-              "text-wrap": "wrap", // Zawijanie tekstu
-              "text-valign": "center", // Wyrównanie tekstu w pionie
-              "text-halign": "center", // Wyrównanie tekstu w poziomie
-              "text-max-width": "200px", // Maksymalna szerokość zawiniętego tekstu
-              "font-size": "10px", // Dostosowanie rozmiaru czcionki
-              "line-color": "#A9A9A9",
-              "target-arrow-color": "#A9A9A9",
-              "target-arrow-shape": "triangle",
-              "curve-style": "bezier",
-              "text-outline-color": "#ffffff", // Obramowanie tekstu dla czytelności
-              "text-outline-width": 2, // Szerokość obramowania
-              color: "#333333", // Kolor tekstu
-              "font-family": "Arial, sans-serif", // Styl czcionki
-              "line-height": 1.2,
+              "text-background-shape": "rectangle", // Tło tekstu w kształcie prostokąta
+              "text-background-color": "#f0f0f0", // Kolor tła
+              "text-background-padding": "6px", // Wypełnienie
+              "text-background-opacity": 1, // Przezroczystość tła
+              label: "data(label)",
+              "text-wrap": "wrap",
+              "text-valign": "center",
+              "text-halign": "center",
+              "text-max-width": "150px",
+              "font-size": "10px",
+              "curve-style": "bezier", // Styl łuku
+              "line-color": "#A9A9A9", // Kolor linii
+              width: 3, // Grubość linii
+              "target-arrow-shape": "triangle", // Kształt strzałki (trójkąt)
+              "target-arrow-color": "#A9A9A9", // Kolor strzałki
+              "arrow-scale": 1.5,
             },
           },
           {
@@ -111,8 +107,6 @@ const CPMGraph: React.FC<Props> = ({ tabGlobal, nodeNumber }) => {
               "text-halign": "center",
               color: "#fff",
               "font-size": "16px",
-              width: "label",
-              height: "label",
               shape: "octagon",
               "text-wrap": "wrap",
               "text-max-width": "100",
@@ -121,13 +115,18 @@ const CPMGraph: React.FC<Props> = ({ tabGlobal, nodeNumber }) => {
           {
             selector: 'edge[isCritical="true"]',
             style: {
+              "text-background-shape": "rectangle", // Tło tekstu w kształcie prostokąta
+              "text-background-color": "#FF4136", // Kolor tła
+              "text-background-padding": "6px", // Wypełnienie
+              "text-background-opacity": 1, // Przezroczystość tła
               label: "data(label)",
               "text-valign": "center",
               "text-halign": "center",
               "line-color": "#FF4136",
               "target-arrow-color": "#FF4136",
-              width: 4,
+              width: 3,
               "text-margin-y": -20,
+              color: "#fff",
             },
           },
         ],
@@ -143,7 +142,19 @@ const CPMGraph: React.FC<Props> = ({ tabGlobal, nodeNumber }) => {
     }
   }, []);
 
-  return <div ref={containerRef} style={{ width: "100%", height: "600px" }} />;
+  return (
+    <>
+      <div ref={containerRef} style={{ width: "80%", height: "600px" }} />
+      <svg>
+        <g>
+          <rect x={60} y={40} width={20} height={20} fill="#FF4136" />
+          <text x={90} y={55} fontSize="12">
+            Czynność krytyczna
+          </text>
+        </g>
+      </svg>
+    </>
+  );
 };
 
 export default CPMGraph;

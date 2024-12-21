@@ -5,6 +5,8 @@ import "./App.css";
 import SolveFirstInput from "./components/SolveFirstInput";
 import SolveSecoundInput from "./components/SolveSecoundInput";
 import CPMtable from "./components/CPMtable";
+import GanttChart from "./components/GanttChart";
+import { Gantt } from "./components/GanttChart";
 
 export type TaskData = {
   task: string | null | undefined;
@@ -67,146 +69,208 @@ function App() {
     }
   };
 
-  return (
-    <div>
-      {isStartVisable && (
-        <div className="container pt-3" id="#start">
-          <div className="row">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-header text-center">
-                  CPM app - informacje
-                </div>
-                <div className="card-body">
-                  <h5 className="card-title">Opis działania aplikacji</h5>
-                  <p className="card-text">
-                    CPM app to aplikacja webowa stworzona w języku TypeScript i
-                    wykorzystująca bibliotekę React.
-                  </p>
-                  <p className="card-text">Słuzy ona do:</p>
-                  <ul>
-                    <li>
-                      obliczania najwcześniejszych oraz najpóźniejszych momentów
-                      zakończenia i rozpoczęcia czynności
-                    </li>
-                    <li>obliczania rezerw czasowych</li>
-                    <li>
-                      <b>wyznaczania ściezki krytycznej</b>
-                    </li>
-                  </ul>
-                  <p className="card-text">
-                    Dane wejściowe powinny zawierać informacje o ilości
-                    czynności, które następnie są oznaczane kolejnymi literami
-                    alfabetu, ilości zdarzeń, które numerowane są od 1 w górę,
-                    czasie trwania danej czynności oraz następstwie zdarzeń.
-                  </p>
-                  <p className="card-text">
-                    Po wprowadzeniu odpowiednich danych aplikacja zwraca wyniki
-                    w formie tabeli oraz grafu.
-                  </p>
-                  <a href="#calc">
-                    <Button onClick={handleStartButton}>Wprowadź dane</Button>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {isCalcVisable && (
-        <div className="container pb-3 pt-3" id="calc">
-          <div className="row">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-header text-center">
-                  CPM app - wprowadzanie danych
-                </div>
-                <div className="card-body">
-                  <h5 className="card-title pt-2 pb-3">{title}</h5>
-                  {!isClicked ? (
-                    <>
-                      {/* inputRefNode={inputRefNode} */}
-                      <SolveFirstInput
-                        inputRefTask={inputRefTask}
-                        isError={isTaskError}
-                      >
-                        Liczba czynności
-                      </SolveFirstInput>
-                      <SolveFirstInput
-                        inputRefNode={inputRefNode}
-                        isError={isNodeError}
-                      >
-                        Liczba zdarzeń
-                      </SolveFirstInput>
-                      <a
-                        href="#calc"
-                        className="btn btn-primary m-2"
-                        onClick={handleInputButton}
-                      >
-                        Przejdź dalej
-                      </a>
-                    </>
-                  ) : (
-                    <></>
-                  )}
+  const dataToGantt = (
+    isLate: boolean
+  ): { tasks: Gantt[]; maxTime: number } => {
+    let id = 0;
+    let maxTime = 0;
 
-                  {isClicked ? (
-                    <>
-                      <SolveSecoundInput
-                        taskNumber={tskNum}
-                        nodeNumber={ndNum}
-                        tabGlobal={tabGlobal.current}
-                        setResultVis={setResultVisable}
-                        setCalcVisabl={setCalcVisable}
-                      />
-                      <a href="#calc">
-                        <Button
-                          onClick={() => {
-                            setClicked(false);
-                            setTitle(
-                              "Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)"
-                            );
-                          }}
+    if (!tabGlobal?.current) {
+      throw new Error("tabGlobal.current is not available");
+    }
+
+    const tasks = tabGlobal.current.map((elem) => {
+      id += 1;
+      maxTime = elem.LF > maxTime ? elem.LF : maxTime;
+      const task = elem.root?.task || "Unknown Task";
+
+      return {
+        id: id,
+        activity: task,
+        taskFrom: elem.root?.taskFrom ?? 0,
+        taskTo: elem.root?.taskTo ?? 0,
+        es: !isLate ? elem.ES : elem.LS,
+        ef: !isLate ? elem.EF : elem.LF,
+        duration: elem.root?.duration ?? 0,
+        reserve: elem.reserve ?? 0,
+        isCritical: elem.isCritical ?? false,
+      };
+    });
+
+    return { tasks, maxTime };
+  };
+
+  return (
+    <div className="card mb-3">
+      <div className="card-header">
+        <img
+          className="card-img-top img-fluid"
+          src="../public/logo3.jpeg"
+          alt="Card image cap"
+          style={{
+            height: "300px",
+            objectFit: "cover",
+            objectPosition: "center 42%",
+          }}
+        />
+      </div>
+      <div className="card-body">
+        {isStartVisable && (
+          <div className="container pt-1" id="#start">
+            <div className="row">
+              <div className="col-12">
+                <div className="card">
+                  <div className="card-header text-center">
+                    CPM app - informacje
+                  </div>
+                  <div className="card-body">
+                    <h5 className="card-title">Opis działania aplikacji</h5>
+                    <hr />
+                    <p className="card-text">
+                      CPM app to aplikacja webowa stworzona w języku TypeScript
+                      i wykorzystująca bibliotekę React.
+                    </p>
+                    <p className="card-text">Słuzy ona do:</p>
+                    <ul>
+                      <li>
+                        obliczania najwcześniejszych oraz najpóźniejszych
+                        momentów zakończenia i rozpoczęcia czynności
+                      </li>
+                      <li>obliczania rezerw czasowych</li>
+                      <li>
+                        <b>wyznaczania ściezki krytycznej</b>
+                      </li>
+                    </ul>
+                    <p className="card-text">
+                      Dane wejściowe powinny zawierać informacje o: ilości
+                      czynności, które następnie są oznaczane kolejnymi literami
+                      alfabetu; ilości zdarzeń, które numerowane są od 1 w górę;
+                      czasie trwania danej czynności oraz następstwie zdarzeń.
+                    </p>
+                    <p className="card-text">
+                      Po wprowadzeniu odpowiednich danych, aplikacja zwraca
+                      wyniki w formie tabeli, grafu oraz harmonogramu Gantta.
+                    </p>
+                    <hr />
+                    <a href="#calc">
+                      <Button onClick={handleStartButton} color="secondary">
+                        Wprowadź dane
+                      </Button>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {isCalcVisable && (
+          <div className="container pt-1" id="calc">
+            <div className="row">
+              <div className="col-12">
+                <div className="card">
+                  <div className="card-header text-center">
+                    CPM app - wprowadzanie danych
+                  </div>
+                  <div className="card-body">
+                    <h5 className="card-title pt-2 pb-2">{title}</h5>
+                    <hr />
+                    {!isClicked ? (
+                      <>
+                        {/* inputRefNode={inputRefNode} */}
+                        <SolveFirstInput
+                          inputRefTask={inputRefTask}
+                          isError={isTaskError}
                         >
-                          Powrót
-                        </Button>
-                      </a>
-                    </>
-                  ) : (
-                    <></>
-                  )}
+                          Liczba czynności
+                        </SolveFirstInput>
+                        <SolveFirstInput
+                          inputRefNode={inputRefNode}
+                          isError={isNodeError}
+                        >
+                          Liczba zdarzeń
+                        </SolveFirstInput>
+                        <hr />
+                        <a
+                          href="#calc"
+                          className="btn btn-secondary"
+                          onClick={handleInputButton}
+                        >
+                          Przejdź dalej
+                        </a>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+
+                    {isClicked ? (
+                      <>
+                        <SolveSecoundInput
+                          taskNumber={tskNum}
+                          nodeNumber={ndNum}
+                          tabGlobal={tabGlobal.current}
+                          setResultVis={setResultVisable}
+                          setCalcVisabl={setCalcVisable}
+                        />
+                        <a href="#calc">
+                          <Button
+                            color="secondary"
+                            onClick={() => {
+                              setClicked(false);
+                              setTitle(
+                                "Wprowadź liczbę czynności (krawędzie) oraz zdarzeń (węzły)"
+                              );
+                            }}
+                          >
+                            Powrót
+                          </Button>
+                        </a>
+                      </>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-      {isResultVisable && (
-        <div className="container pb-3 pt-3" id="result">
-          <div className="row">
-            <div className="col-12">
-              <div className="card">
-                <div className="card-header text-center">CPM app - wyniki</div>
-                <div className="card-body">
-                  <h5 className="pb-2">CPM Tabele</h5>
-                  <CPMtable tabGlobal={tabGlobal.current} />
-                  <h5 className="pb-2">CPM Graf</h5>
-                  <CPMGraph tabGlobal={tabGlobal.current} nodeNumber={ndNum} />
-                  <a
-                    href="#start"
-                    className="btn btn-primary"
-                    onClick={() => {
-                      window.location.reload();
-                    }}
-                  >
-                    Wróć do początku
-                  </a>
+        )}
+        {isResultVisable && (
+          <div className="container pt-1" id="result">
+            <div className="row">
+              <div className="col-12">
+                <div className="card">
+                  <div className="card-header text-center">
+                    CPM app - wyniki
+                  </div>
+                  <div className="card-body">
+                    <h5 className="pb-2">CPM Tabele</h5>
+                    <CPMtable tabGlobal={tabGlobal.current} />
+                    <hr />
+                    <h5 className="pb-2">CPM Graf</h5>
+                    <CPMGraph
+                      tabGlobal={tabGlobal.current}
+                      nodeNumber={ndNum}
+                    />
+                    <hr />
+                    <h5>Harmonogram Gantta ASAP</h5>
+                    <GanttChart data={dataToGantt(false)} />
+                    <hr />
+                    <a
+                      href="#start"
+                      className="btn btn-secondary"
+                      onClick={() => {
+                        window.location.reload();
+                      }}
+                    >
+                      Wróć do początku
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
